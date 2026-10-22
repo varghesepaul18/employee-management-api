@@ -1,8 +1,9 @@
 package com.codenzic.employeemanagement.employee.controller;
 
-import java.util.List;
-
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,9 +15,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -26,7 +31,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import com.codenzic.employeemanagement.employee.dto.EmployeeRequest;
 import com.codenzic.employeemanagement.employee.dto.EmployeeResponse;
+import com.codenzic.employeemanagement.employee.dto.EmployeeSortField;
+import com.codenzic.employeemanagement.employee.dto.PageResponse;
+import com.codenzic.employeemanagement.employee.entity.EmployeeStatus;
 import com.codenzic.employeemanagement.employee.service.EmployeeService;
+
 
 
 @PreAuthorize("hasRole('ADMIN')")
@@ -74,12 +83,50 @@ public class EmployeeController {
     }
 
     @GetMapping("/all")
-    @Operation(summary = "List all employees")
-    @ApiResponse(responseCode = "200", description = "Employee list returned")
-    public ResponseEntity<List<EmployeeResponse>> getAllEmployees() {
-        log.info("Received request to retrieve all employees");
-        
-        List<EmployeeResponse> employees = employeeService.getAllEmployees();
+    @Operation(summary = "List employees with pagination and optional filters")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Employee page returned"),
+            @ApiResponse(responseCode = "400", description = "Invalid query parameter")
+    })
+    public ResponseEntity<PageResponse<EmployeeResponse>> getAllEmployees(
+            @Parameter(description = "Search name, email, department, or job title")
+            @RequestParam(required = false)
+            @Size(max = 100)
+            String search,
+
+            @Parameter(description = "Filter by employee status")
+            @RequestParam(required = false)
+            EmployeeStatus status,
+
+            @Parameter(description = "Zero-based page number")
+            @RequestParam(defaultValue = "0")
+            @Min(0)
+            int page,
+
+            @Parameter(description = "Number of employees per page; maximum 100")
+            @RequestParam(defaultValue = "10")
+            @Min(1)
+            @Max(100)
+            int size,
+
+            @Parameter(description = "Field to sort by")
+            @RequestParam(defaultValue = "LAST_NAME")
+            EmployeeSortField sortBy,
+
+            @Parameter(description = "Sort direction")
+            @RequestParam(defaultValue = "ASC")
+            Sort.Direction direction
+    ) {
+        log.info("Received employee list request for page {}", page);
+
+        Sort sort = Sort.by(direction, sortBy.getProperty())
+                .and(Sort.by(Sort.Direction.ASC, "id"));
+
+        var pageable = PageRequest.of(page, size, sort);
+
+        PageResponse<EmployeeResponse> employees =
+                employeeService.getEmployees(search, status, pageable);
+
         return ResponseEntity.ok(employees);
     }
 

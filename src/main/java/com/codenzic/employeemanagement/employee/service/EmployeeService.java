@@ -1,15 +1,20 @@
 package com.codenzic.employeemanagement.employee.service;
 
-import java.util.List;
+import org.springframework.data.domain.Pageable;
 
 import com.codenzic.employeemanagement.employee.dto.EmployeeRequest;
 import com.codenzic.employeemanagement.employee.dto.EmployeeResponse;
+import com.codenzic.employeemanagement.employee.dto.PageResponse;
+import com.codenzic.employeemanagement.employee.entity.EmployeeStatus;
 
 public interface EmployeeService {
 
     EmployeeResponse createEmployee(EmployeeRequest employeeRequest);
 
-    List<EmployeeResponse> getAllEmployees();
+    PageResponse<EmployeeResponse> getEmployees(
+            String search,
+            EmployeeStatus status,
+            Pageable pageable);
 
     EmployeeResponse getEmployeeById(Long id);
 
