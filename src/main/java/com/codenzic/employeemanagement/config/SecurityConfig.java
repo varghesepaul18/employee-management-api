@@ -9,21 +9,28 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import com.codenzic.employeemanagement.security.SecurityErrorHandler;
 
 @Configuration 
 @EnableMethodSecurity 
 public class SecurityConfig {
 
+    private final SecurityErrorHandler securityErrorHandler;
+
+    public SecurityConfig(SecurityErrorHandler securityErrorHandler) {
+        this.securityErrorHandler = securityErrorHandler;
+    }
+
     @Bean
-    SecurityFilterChain securityFilterChain(
-            HttpSecurity http,
-            JwtAuthenticationConverter jwtAuthenticationConverter
-    ) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(securityErrorHandler)
+                        .accessDeniedHandler(securityErrorHandler))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                             "/api/v1/auth/**",
@@ -38,7 +45,9 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(resourceServer ->
                         resourceServer.jwt(jwt ->
-                                jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)))
+                                jwt.jwtAuthenticationConverter(jwtAuthenticationConverter))
+                                .authenticationEntryPoint(securityErrorHandler)
+                                .accessDeniedHandler(securityErrorHandler))
                 .build();
     }
 
