@@ -18,7 +18,10 @@ import com.codenzic.employeemanagement.auth.dto.LoginRequest;
 import com.codenzic.employeemanagement.auth.dto.LoginResponse;
 import com.codenzic.employeemanagement.config.AuthProperties;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j 
 public class AuthService {
 
     private final AuthProperties authProperties;
@@ -53,6 +56,7 @@ public class AuthService {
         JwsHeader jwsHeader = JwsHeader.with(MacAlgorithm.HS256).build();
         String token = jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
         long expiresInSeconds = tokenExpirationMillis / 1_000;
+        log.info("Generated JWT token for user {}", authProperties.username());
 
         return new LoginResponse(token, "Bearer", expiresInSeconds);
     }

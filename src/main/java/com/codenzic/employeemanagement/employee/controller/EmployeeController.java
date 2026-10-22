@@ -17,6 +17,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import com.codenzic.employeemanagement.employee.dto.EmployeeRequest;
 import com.codenzic.employeemanagement.employee.dto.EmployeeResponse;
@@ -27,6 +33,8 @@ import com.codenzic.employeemanagement.employee.service.EmployeeService;
 @RestController
 @Slf4j
 @RequestMapping("/api/v1/employees")
+@Tag(name = "Employees", description = "Admin-only employee management operations")
+@SecurityRequirement(name = "bearerAuth")
 public class EmployeeController {
 
     private final EmployeeService employeeService;
@@ -36,6 +44,12 @@ public class EmployeeController {
     }
 
     @PostMapping("/create")
+    @Operation(summary = "Create an employee")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Employee created"),
+            @ApiResponse(responseCode = "400", description = "Request validation failed"),
+            @ApiResponse(responseCode = "409", description = "Email is already in use")
+    })
     public ResponseEntity<EmployeeResponse> createEmployee(@Valid @RequestBody EmployeeRequest employeeRequest) {
         log.info("Received request to create an employee");
 
@@ -45,7 +59,14 @@ public class EmployeeController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EmployeeResponse> getEmployee(@PathVariable Long id) {
+    @Operation(summary = "Get an employee by ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Employee found"),
+            @ApiResponse(responseCode = "404", description = "Employee not found")
+    })
+    public ResponseEntity<EmployeeResponse> getEmployee(
+            @Parameter(description = "Employee ID") @PathVariable Long id
+    ) {
         log.info("Received request to retrieve employee with ID {}", id);
 
         EmployeeResponse employee = employeeService.getEmployeeById(id);
@@ -53,6 +74,8 @@ public class EmployeeController {
     }
 
     @GetMapping("/all")
+    @Operation(summary = "List all employees")
+    @ApiResponse(responseCode = "200", description = "Employee list returned")
     public ResponseEntity<List<EmployeeResponse>> getAllEmployees() {
         log.info("Received request to retrieve all employees");
         
@@ -61,8 +84,15 @@ public class EmployeeController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Replace employee details")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Employee updated"),
+            @ApiResponse(responseCode = "400", description = "Request validation failed"),
+            @ApiResponse(responseCode = "404", description = "Employee not found"),
+            @ApiResponse(responseCode = "409", description = "Email is already in use")
+    })
     public ResponseEntity<EmployeeResponse> updateEmployee(
-            @PathVariable Long id,
+            @Parameter(description = "Employee ID") @PathVariable Long id,
             @Valid @RequestBody EmployeeRequest employeeRequest
     ) {
 
@@ -75,12 +105,16 @@ public class EmployeeController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteEmployee(@PathVariable Long id) {
+    @Operation(summary = "Delete an employee")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Employee deleted"),
+            @ApiResponse(responseCode = "404", description = "Employee not found")
+    })
+    public void deleteEmployee(@Parameter(description = "Employee ID") @PathVariable Long id) {
 
         log.info("Received request to delete employee with ID {}", id);
         employeeService.deleteEmployee(id);
         log.info("Deleted employee with ID {}", id);
-
     }
 
 }
