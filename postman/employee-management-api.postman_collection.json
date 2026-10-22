@@ -132,7 +132,7 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/api/v1/employees/all",
+              "raw": "{{baseUrl}}/api/v1/employees/all?page=0&size=10&sortBy=LAST_NAME&direction=ASC",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -141,8 +141,27 @@
                 "v1",
                 "employees",
                 "all"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "LAST_NAME"
+                },
+                {
+                  "key": "direction",
+                  "value": "ASC"
+                }
               ]
-            }
+            },
+            "description": "Returns the first page of employees. Page numbering starts at 0; size is limited to 100."
           },
           "response": []
         },
@@ -217,6 +236,269 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Search employees",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/employees/all?search={{searchTerm}}&page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "employees",
+                "all"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "{{searchTerm}}"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Searches first name, last name, email, department, and job title."
+          },
+          "response": []
+        },
+        {
+          "name": "Filter active employees",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/employees/all?status=ACTIVE&page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "employees",
+                "all"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "ACTIVE"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Returns active employees in a page."
+          },
+          "response": []
+        },
+        {
+          "name": "Search and filter employees",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/employees/all?search={{searchTerm}}&status=ACTIVE&page=0&size=5&sortBy=FIRST_NAME&direction=ASC",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "employees",
+                "all"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "{{searchTerm}}"
+                },
+                {
+                  "key": "status",
+                  "value": "ACTIVE"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "5"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "FIRST_NAME"
+                },
+                {
+                  "key": "direction",
+                  "value": "ASC"
+                }
+              ]
+            },
+            "description": "Combines free-text search, status filtering, pagination, and sorting."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Actuator",
+      "item": [
+        {
+          "name": "Health",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/actuator/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "health"
+              ]
+            },
+            "description": "Public health status endpoint."
+          },
+          "response": []
+        },
+        {
+          "name": "Info",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/actuator/info",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "info"
+              ]
+            },
+            "description": "Application information. Uses the collection Bearer token."
+          },
+          "response": []
+        },
+        {
+          "name": "List loggers",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/actuator/loggers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "loggers"
+              ]
+            },
+            "description": "Lists logger names and their configured and effective levels. Requires an ADMIN JWT."
+          },
+          "response": []
+        },
+        {
+          "name": "Get application logger",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/actuator/loggers/{{loggerName}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "loggers",
+                "{{loggerName}}"
+              ]
+            },
+            "description": "Gets the current configured and effective level for the application package logger."
+          },
+          "response": []
+        },
+        {
+          "name": "Set application logger level",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"configuredLevel\": \"{{logLevel}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/actuator/loggers/{{loggerName}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "loggers",
+                "{{loggerName}}"
+              ]
+            },
+            "description": "Changes the application package logger level at runtime. Uses the collection Bearer token and requires ADMIN."
+          },
+          "response": []
+        },
+        {
+          "name": "Reset application logger level",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"configuredLevel\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/actuator/loggers/{{loggerName}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "loggers",
+                "{{loggerName}}"
+              ]
+            },
+            "description": "Removes the runtime override so the logger inherits its configured level again. Requires ADMIN."
+          },
+          "response": []
         }
       ]
     }
@@ -245,6 +527,21 @@
     {
       "key": "employeeId",
       "value": "",
+      "type": "string"
+    },
+    {
+      "key": "searchTerm",
+      "value": "engineering",
+      "type": "string"
+    },
+    {
+      "key": "loggerName",
+      "value": "com.codenzic.employeemanagement",
+      "type": "string"
+    },
+    {
+      "key": "logLevel",
+      "value": "DEBUG",
       "type": "string"
     }
   ]

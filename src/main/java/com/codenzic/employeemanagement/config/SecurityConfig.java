@@ -28,10 +28,13 @@ public class SecurityConfig {
                         .requestMatchers(
                             "/api/v1/auth/**",
                             "/actuator/health",
+                            "/actuator/info",
                             "/swagger-ui/**",
                             "/swagger-ui.html",
                             "/v3/api-docs/**"
                         ).permitAll()
+                        .requestMatchers("/actuator/loggers", "/actuator/loggers/**")
+                        .hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(resourceServer ->
                         resourceServer.jwt(jwt ->
